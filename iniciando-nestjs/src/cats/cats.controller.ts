@@ -1,11 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Req, Get, Post, Param } from '@nestjs/common';
+import { Controller, Req, Get, Post, Param, Body } from '@nestjs/common';
 import { Request } from 'express';
+import { CreateCatDto } from './create-cat-dto';
 
 @Controller('cats')
 export class CatsController {
     @Post()
-    create(): string {
+    create(@Body() createCatDto: CreateCatDto) {
         return 'Está ação adiciona um novo gato';
     }
 
