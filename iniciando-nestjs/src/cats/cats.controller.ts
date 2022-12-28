@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Req, Get, Post, Param, Body } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, Post, Param, Body, Query, Put, Delete } from '@nestjs/common';
 import { CreateCatDto } from './create-cat-dto';
 
 @Controller('cats')
@@ -10,15 +9,14 @@ export class CatsController {
         return 'Está ação adiciona um novo gato';
     }
 
-    @Get()
-    findAll(@Req() request: Request): string {
-        return 'Este ação retona todos os gatos';
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return `Esta ação retorna o ID: #${id} de gatos`;
     }
 
-    @Get(':id')
-    findOne(@Param() params): string {
-        console.log(params.id);
-        return `Esta ação retorna o ID: #${params.id} de gatos`;
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return `Esta ação exclui pelo ID: #${id} o gato`;        
     }
 
 }
