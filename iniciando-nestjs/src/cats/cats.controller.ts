@@ -1,22 +1,21 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Param, Body, Query, Put, Delete } from '@nestjs/common';
-import { CreateCatDto } from './create-cat-dto';
+import { Controller, Get, Post, Body} from '@nestjs/common';
+import { CreateCatDto } from './dtos/create-cat-dto';
+import { CatsService } from './cats.service';
+import { Cat } from './interfaces/cat.interface';
 
 @Controller('cats')
 export class CatsController {
+    constructor(private catsService: CatsService) {}
+
     @Post()
-    create(@Body() createCatDto: CreateCatDto) {
-        return 'Está ação adiciona um novo gato';
+    async create(@Body() createCatDto: CreateCatDto) {
+        this.catsService.create(createCatDto);
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return `Esta ação retorna o ID: #${id} de gatos`;
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return `Esta ação exclui pelo ID: #${id} o gato`;        
+    @Get()
+    async findAll(): Promise<Cat[]> {
+        return this.catsService.findAll();
     }
 
 }
