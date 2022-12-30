@@ -4,12 +4,15 @@ import { Controller, Get, Post, Body,Param} from '@nestjs/common';
 import { CreateCatDto } from './dto/create-cat-dto';
 import { CatsService } from './cats.service';
 import { Cat } from './schemas/cat.schema';
+import { Role } from 'src/roles/enums/role.enum';
+import { Roles } from '../roles/role.decorador';
 
 @Controller('cats')
 export class CatsController {
     constructor(private catsService: CatsService) {}
 
     @Post()
+    @Roles(Role.Admin)
     async create(@Body() createCatDto: CreateCatDto) {
         await this.catsService.create(createCatDto);
     }
