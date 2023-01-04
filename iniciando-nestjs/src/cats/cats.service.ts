@@ -1,27 +1,78 @@
 /* eslint-disable prettier/prettier */
-import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Cat, CatDocument } from './schemas/cat.schema';
-import { CreateCatDto } from './dto/create-cat-dto';
+import { Cat } from 'src/models/cat.model';
+import { FirebaseService } from '../firebase/firebase.service';
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    UserCredential,
+  } from 'firebase/auth';
+
+  import {
+    doc,
+    setDoc,
+    DocumentReference,
+    getDoc,
+    DocumentSnapshot,
+    DocumentData,
+  } from 'firebase/firestore';
 
 @Injectable()
 export class CatsService {
-    constructor(
-        @InjectModel(Cat.name, 'cats')
-        private catModel: Model<CatDocument>) {}
+    constructor(private firebaseService: FirebaseService) {}
 
-    async create(createCatDto: CreateCatDto): Promise<Cat> {
-        const createdCat = new this.catModel(createCatDto);
-        return createdCat.save();
+    public async login(
+        email: string,
+        password: string,
+      ): Promise<Omit<Cat, 'password'>> {
+        // Firebase logic here
+        try {
+          const userCredential: UserCredential = await signInWithEmailAndPassword(
+            this.firebaseService.auth,
+            email,
+            password,
+          );
+    
+          if (userCredential) {
+            const id: string = userCredential.user.uid;
+            const docRef: DocumentReference = doc(
+              this.firebaseService.usersCollection,
+              id,
+            );
+            const snapShot: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+            const loggedUser: Cat = {
+              ...snapShot.data(),
+              id: snapShot.id,
+            } as Cat;
+    
+            delete loggedUser.password;
+            console.log('Login feito com sucesso');
+            return loggedUser;
+          }
+        } catch (error: unknown) {
+          console.warn(`Não foi possivel logar ${error}`);
+        }
+      }
+
+    public async register(body: Omit<Cat, 'id'>): Promise<void> {
+        try {
+            const userCredential: UserCredential =
+                await createUserWithEmailAndPassword(
+                this.firebaseService.auth,
+                    body.email,
+                    body.password,
+                );
+
+            if (userCredential) {
+                const id: string = userCredential.user.uid;
+                const docRef: DocumentReference = doc(
+                  this.firebaseService.usersCollection,
+                  id,
+                );
+                await setDoc(docRef, body);
+              }
+            } catch (error: unknown) {
+              console.warn(`[ERROR] ${error}`);
+        }
     }
-
-    async findAll(): Promise<Cat[]> {
-        return this.catModel.find().exec();
-    }
-
-    async findOne(id: string): Promise<Cat> {
-        return this.catModel.findOne({ _id: id}).exec();
-    }
-
 }
