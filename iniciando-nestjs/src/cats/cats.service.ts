@@ -32,7 +32,7 @@ export class CatsService {
             email,
             password,
           );
-    
+
           if (userCredential) {
             const id: string = userCredential.user.uid;
             const docRef: DocumentReference = doc(
@@ -44,7 +44,7 @@ export class CatsService {
               ...snapShot.data(),
               id: snapShot.id,
             } as Cat;
-    
+
             delete loggedUser.password;
             console.log('Login feito com sucesso');
             return loggedUser;
