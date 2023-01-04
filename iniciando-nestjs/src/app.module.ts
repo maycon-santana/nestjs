@@ -1,21 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { CatsModule } from './cats/cats.module';
-import { LoggerMiddleware } from './logger.middleware';
+import { FirebaseService } from './firebase/firebase.service';
 
 @Module({
-  imports: [
-    CatsModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/projeto-nestjs', {
-      connectionName: 'cats',
-    }), 
-  ],
+  imports: [CatsModule, ConfigModule.forRoot()],
+  providers: [FirebaseService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-      consumer
-        .apply(LoggerMiddleware)
-        .forRoutes({ path: 'cats', method: RequestMethod.GET });
-  }
-}
+export class AppModule {}
+
